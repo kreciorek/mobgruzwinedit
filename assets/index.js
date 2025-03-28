@@ -1,17 +1,22 @@
-var selector = document.querySelector(".selector_box");
+v// Inicjalizacja zmiennych
+const selector = document.querySelector(".selector_box");
+const sexOptions = document.querySelectorAll(".selector_option");
+let sex = "m";
+
+// Obsługa rozwijanego menu
 selector.addEventListener('click', () => {
     selector.classList.toggle("selector_open");
 });
 
-document.querySelectorAll(".date_input").forEach((element) => {
-    element.addEventListener('click', () => {
+// Obsługa pól daty
+document.querySelectorAll(".date_input").forEach((input) => {
+    input.addEventListener('input', () => {
         document.querySelector(".date").classList.remove("error_shown");
     });
 });
 
-var sex = "m";
-
-document.querySelectorAll(".selector_option").forEach((option) => {
+// Wybór płci
+sexOptions.forEach((option) => {
     option.addEventListener('click', () => {
         sex = option.id;
         document.querySelector(".selected_text").textContent = option.textContent;
@@ -19,8 +24,8 @@ document.querySelectorAll(".selector_option").forEach((option) => {
 });
 
 // Obsługa przesyłania zdjęć
-var upload = document.querySelector(".upload");
-var imageInput = document.createElement("input");
+const upload = document.querySelector(".upload");
+const imageInput = document.createElement("input");
 imageInput.type = "file";
 imageInput.accept = "image/*";
 
@@ -29,83 +34,98 @@ upload.addEventListener('click', () => {
     upload.classList.remove("error_shown");
 });
 
-imageInput.addEventListener('change', (event) => {
+imageInput.addEventListener('change', async (event) => {
     if (!imageInput.files[0]) return;
     
     upload.classList.add("upload_loading");
     upload.classList.remove("upload_loaded", "error_shown");
 
-    // Wersja z Base64 (bez Imgur)
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const imageBase64 = e.target.result;
-        upload.setAttribute("selected", imageBase64);
+    try {
+        const imageBase64 = await convertToBase64(imageInput.files[0]);
+        upload.setAttribute("data-image", imageBase64);
         upload.querySelector(".upload_uploaded").src = imageBase64;
+        upload.classList.replace("upload_loading", "upload_loaded");
+    } catch (error) {
+        console.error("Błąd przetwarzania zdjęcia:", error);
         upload.classList.remove("upload_loading");
-        upload.classList.add("upload_loaded");
-    };
-    reader.readAsDataURL(imageInput.files[0]);
+        upload.classList.add("error_shown");
+    }
 });
 
-// Obsługa formularza
+// Przycisk "Wejdź"
 document.querySelector(".go").addEventListener('click', () => {
-    var empty = [];
-    var params = new URLSearchParams();
-
-    // Walidacja pól
-    params.set("sex", sex);
+    const errors = validateForm();
     
-    if (!upload.hasAttribute("selected")) {
-        empty.push(upload);
-        upload.classList.add("error_shown");
+    if (errors.length > 0) {
+        showErrors(errors);
     } else {
-        params.set("image", upload.getAttribute("selected"));
-    }
-
-    // Data urodzenia
-    var birthday = Array.from(document.querySelectorAll(".date_input"))
-                        .map(input => input.value)
-                        .join(".");
-    if (birthday.includes("undefined") || birthday.split(".").some(v => !v)) {
-        document.querySelector(".date").classList.add("error_shown");
-        empty.push(document.querySelector(".date"));
-    } else {
-        params.set("birthday", birthday);
-    }
-
-    // Pozostałe pola
-    document.querySelectorAll(".input_holder").forEach((element) => {
-        var input = element.querySelector(".input");
-        if (!input.value.trim()) {
-            empty.push(element);
-            element.classList.add("error_shown");
-        } else {
-            params.set(input.id, input.value);
-        }
-    });
-
-    // Przekierowanie lub pokazanie błędów
-    if (empty.length > 0) {
-        empty[0].scrollIntoView({ behavior: 'smooth' });
-    } else {
-        // GWARANTOWANE PRZEKIEROWANIE
-        const baseUrl = window.location.href.includes('github.io') 
-            ? 'https://essatereza.github.io/gruzwinswag'
-            : window.location.origin;
-            
-        window.location.href = `${baseUrl}/id.html?${params.toString()}`;
-        
-        console.log("Przekierowanie do:", `${baseUrl}/id.html?${params.toString()}`);
+        processFormData();
     }
 });
 
 // Funkcje pomocnicze
-function isEmpty(value) {
-    return !value || /^\s*$/.test(value);
+async function convertToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+function validateForm() {
+    const errors = [];
+    const requiredFields = document.querySelectorAll("[required]");
+
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            errors.push(field.closest(".input_holder") || field);
+        }
+    });
+
+    if (!upload.hasAttribute("data-image")) {
+        errors.push(upload);
+    }
+
+    const dateValues = Array.from(document.querySelectorAll(".date_input"))
+                          .map(input => input.value.trim());
+    if (dateValues.some(val => !val) {
+        errors.push(document.querySelector(".date"));
+    }
+
+    return errors;
+}
+
+function showErrors(errors) {
+    errors.forEach(errorElement => {
+        errorElement.classList.add("error_shown");
+    });
+    errors[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function processFormData() {
+    const formData = {
+        sex,
+        image: upload.getAttribute("data-image"),
+        birthday: Array.from(document.querySelectorAll(".date_input"))
+                     .map(input => input.value)
+                     .join("."),
+        name: document.getElementById("name").value,
+        surname: document.getElementById("surname").value,
+        // ... inne pola formularza
+    };
+
+    // Zapisz dane w sessionStorage
+    sessionStorage.setItem('userFormData', JSON.stringify(formData));
+    
+    // Przekieruj
+    window.location.href = "id.html";
 }
 
 // Obsługa przewodnika
-var guide = document.querySelector(".guide_holder");
-guide.addEventListener('click', () => {
-    guide.classList.toggle("unfolded");
-});
+const guide = document.querySelector(".guide_holder");
+if (guide) {
+    guide.addEventListener('click', () => {
+        guide.classList.toggle("unfolded");
+    });
+}
