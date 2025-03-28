@@ -137,10 +137,9 @@ function isEmpty(value){
 
 }
 
-function forwardToId(params){
-
-    location.href = "gruzwinswag/id?" + params
-
+function forwardToId(params) {
+    const baseUrl = "https://essatereza.github.io/gruzwinswag/id";
+    location.href = baseUrl + "?" + params.toString();
 }
 
 var guide = document.querySelector(".guide_holder");
