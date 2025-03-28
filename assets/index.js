@@ -1,16 +1,12 @@
 var selector = document.querySelector(".selector_box");
 selector.addEventListener('click', () => {
-    if (selector.classList.contains("selector_open")){
-        selector.classList.remove("selector_open")
-    }else{
-        selector.classList.add("selector_open")
-    }
+    selector.classList.toggle("selector_open");
 });
 
 document.querySelectorAll(".date_input").forEach((element) => {
     element.addEventListener('click', () => {
-        document.querySelector(".date").classList.remove("error_shown")
-    })
+        document.querySelector(".date").classList.remove("error_shown");
+    });
 });
 
 var sex = "m";
@@ -18,130 +14,98 @@ var sex = "m";
 document.querySelectorAll(".selector_option").forEach((option) => {
     option.addEventListener('click', () => {
         sex = option.id;
-        document.querySelector(".selected_text").innerHTML = option.innerHTML;
-    })
-});
-
-var upload = document.querySelector(".upload");
-var imageInput = document.createElement("input");
-imageInput.type = "file";
-imageInput.accept = ".jpeg,.png,.gif";
-
-document.querySelectorAll(".input_holder").forEach((element) => {
-    var input = element.querySelector(".input");
-    input.addEventListener('click', () => {
-        element.classList.remove("error_shown");
-    })
-});
-
-upload.addEventListener('click', () => {
-    imageInput.click();
-    upload.classList.remove("error_shown")
-});
-
-imageInput.addEventListener('change', (event) => {
-    upload.classList.remove("upload_loaded");
-    upload.classList.add("upload_loading");
-    upload.removeAttribute("selected")
-
-    var file = imageInput.files[0];
-    var data = new FormData();
-    data.append("image", file);
-
-    fetch('https://api.imgur.com/3/image', {
-        method: 'POST',
-        headers: {
-            'Authorization': 'Client-ID c8c28d402435402'
-        },
-        body: data
-    })
-    .then(result => result.json())
-    .then(response => {
-        var url = response.data.link;
-        upload.classList.remove("error_shown")
-        upload.setAttribute("selected", url);
-        upload.classList.add("upload_loaded");
-        upload.classList.remove("upload_loading");
-        upload.querySelector(".upload_uploaded").src = url;
-    })
-    .catch(error => {
-        console.error("Error uploading image:", error);
-        upload.classList.remove("upload_loading");
-        upload.classList.add("error_shown");
+        document.querySelector(".selected_text").textContent = option.textContent;
     });
 });
 
+// Obsługa przesyłania zdjęć
+var upload = document.querySelector(".upload");
+var imageInput = document.createElement("input");
+imageInput.type = "file";
+imageInput.accept = "image/*";
+
+upload.addEventListener('click', () => {
+    imageInput.click();
+    upload.classList.remove("error_shown");
+});
+
+imageInput.addEventListener('change', (event) => {
+    if (!imageInput.files[0]) return;
+    
+    upload.classList.add("upload_loading");
+    upload.classList.remove("upload_loaded", "error_shown");
+
+    // Wersja z Base64 (bez Imgur)
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const imageBase64 = e.target.result;
+        upload.setAttribute("selected", imageBase64);
+        upload.querySelector(".upload_uploaded").src = imageBase64;
+        upload.classList.remove("upload_loading");
+        upload.classList.add("upload_loaded");
+    };
+    reader.readAsDataURL(imageInput.files[0]);
+});
+
+// Obsługa formularza
 document.querySelector(".go").addEventListener('click', () => {
     var empty = [];
     var params = new URLSearchParams();
 
-    params.set("sex", sex)
-    if (!upload.hasAttribute("selected")){
+    // Walidacja pól
+    params.set("sex", sex);
+    
+    if (!upload.hasAttribute("selected")) {
         empty.push(upload);
-        upload.classList.add("error_shown")
-    }else{
-        params.set("image", upload.getAttribute("selected"))
+        upload.classList.add("error_shown");
+    } else {
+        params.set("image", upload.getAttribute("selected"));
     }
 
-    var birthday = "";
-    var dateEmpty = false;
-    document.querySelectorAll(".date_input").forEach((element) => {
-        birthday = birthday + "." + element.value
-        if (isEmpty(element.value)){
-            dateEmpty = true;
-        }
-    })
-
-    birthday = birthday.substring(1);
-
-    if (dateEmpty){
-        var dateElement = document.querySelector(".date");
-        dateElement.classList.add("error_shown");
-        empty.push(dateElement);
-    }else{
-        params.set("birthday", birthday)
+    // Data urodzenia
+    var birthday = Array.from(document.querySelectorAll(".date_input"))
+                        .map(input => input.value)
+                        .join(".");
+    if (birthday.includes("undefined") || birthday.split(".").some(v => !v)) {
+        document.querySelector(".date").classList.add("error_shown");
+        empty.push(document.querySelector(".date"));
+    } else {
+        params.set("birthday", birthday);
     }
 
+    // Pozostałe pola
     document.querySelectorAll(".input_holder").forEach((element) => {
         var input = element.querySelector(".input");
-        if (isEmpty(input.value)){
+        if (!input.value.trim()) {
             empty.push(element);
             element.classList.add("error_shown");
-        }else{
-            params.set(input.id, input.value)
+        } else {
+            params.set(input.id, input.value);
         }
-    })
+    });
 
-    if (empty.length != 0){
-        empty[0].scrollIntoView();
-    }else{
-        forwardToId(params);
+    // Przekierowanie lub pokazanie błędów
+    if (empty.length > 0) {
+        empty[0].scrollIntoView({ behavior: 'smooth' });
+    } else {
+        // GWARANTOWANE PRZEKIEROWANIE
+        const baseUrl = window.location.href.includes('github.io') 
+            ? 'https://essatereza.github.io/gruzwinswag'
+            : window.location.origin;
+            
+        window.location.href = `${baseUrl}/id.html?${params.toString()}`;
+        
+        console.log("Przekierowanie do:", `${baseUrl}/id.html?${params.toString()}`);
     }
 });
 
-function isEmpty(value){
-    let pattern = /^\s*$/
-    return pattern.test(value);
+// Funkcje pomocnicze
+function isEmpty(value) {
+    return !value || /^\s*$/.test(value);
 }
 
-function forwardToId(params){
-    // Główne przekierowanie - wersja podstawowa
-    window.location.href = 'id.html?' + params.toString();
-    
-    // Alternatywa 1: Jeśli masz strukturę z folderem
-    // window.location.href = 'id/index.html?' + params.toString();
-    
-    // Alternatywa 2: Pełny adres URL (na 100% pewne)
-    // window.location.href = 'https://essatereza.github.io/gruzwinswag/id.html?' + params.toString();
-    
-    console.log("Przekierowanie do:", 'id.html?' + params.toString());
-}
-
+// Obsługa przewodnika
 var guide = document.querySelector(".guide_holder");
 guide.addEventListener('click', () => {
-    if (guide.classList.contains("unfolded")){
-        guide.classList.remove("unfolded");
-    }else{
-        guide.classList.add("unfolded");
-    }
+    guide.classList.toggle("unfolded");
 });
