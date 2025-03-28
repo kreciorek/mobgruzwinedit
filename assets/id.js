@@ -14,11 +14,11 @@ document.querySelector(".welcome").innerHTML = welcome;
 
 // POPRAWIONE: Funkcja przekierowania do /id
 function toId() {
-    // Pobierz bazowy URL (https://essatereza.github.io/gruzwinswag)
-    const baseUrl = window.location.origin + '/gruzwinswag';
+    // Pobierz pełny URL do folderu gruzwinswag
+    const baseUrl = 'https://essatereza.github.io/gruzwinswag';
     
-    // Przekieruj do /id z parametrami
-    window.location.href = `${baseUrl}gruzwinswag/id/?${params.toString()}`;
+    // Przekieruj do /id/ z parametrami
+    window.location.href = `${baseUrl}/id/?${params.toString()}`;
     
     console.log("Przekierowanie do:", `${baseUrl}/id/?${params.toString()}`);
 }
