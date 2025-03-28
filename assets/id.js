@@ -14,13 +14,7 @@ document.querySelector(".welcome").innerHTML = welcome;
 
 // POPRAWIONE: Funkcja przekierowania do /id
 function toId() {
-    // Pobierz pełny URL do folderu gruzwinswag
-    const baseUrl = 'https://essatereza.github.io/gruzwinswag';
-    
-    // Przekieruj do /id/ z parametrami
-    window.location.href = `${baseUrl}/id/?${params.toString()}`;
-    
-    console.log("Przekierowanie do:", `${baseUrl}/id/?${params.toString()}`);
+    window.location.href = 'https://essatereza.github.io/gruzwinswag/id/?' + params.toString();
 }
 
 // Optymalizacja: Uproszczona obsługa hasła
