@@ -18,7 +18,7 @@ function toId() {
     const baseUrl = window.location.origin + '/gruzwinswag';
     
     // Przekieruj do /id z parametrami
-    window.location.href = `${baseUrl}/id/?${params.toString()}`;
+    window.location.href = `${baseUrl}gruzwinswag/id/?${params.toString()}`;
     
     console.log("Przekierowanie do:", `${baseUrl}/id/?${params.toString()}`);
 }
