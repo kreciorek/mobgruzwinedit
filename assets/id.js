@@ -1,79 +1,88 @@
+// Inicjalizacja po załadowaniu strony
+document.addEventListener('DOMContentLoaded', function() {
+    // Elementy DOM
+    const userPhoto = document.getElementById('userPhoto');
+    const displayName = document.getElementById('displayName');
+    const displaySurname = document.getElementById('displaySurname');
+    const displayBirthday = document.getElementById('displayBirthday');
+    const displaySex = document.getElementById('displaySex');
+    const backButton = document.getElementById('backButton');
+    const errorMessage = document.getElementById('errorMessage');
 
-var params = new URLSearchParams(window.location.search);
+    // Pobierz dane z sessionStorage
+    try {
+        const savedData = sessionStorage.getItem('userFormData');
+        
+        if (savedData) {
+            const formData = JSON.parse(savedData);
 
-document.querySelector(".login").addEventListener('click', () => {
-    toHome();
-});
-
-var welcome = "Dzień dobry!";
-
-var hours = new Date().getHours();
-if (hours >= 18 || hours < 4){
-    welcome = "Dobry wieczór!"
-}
-document.querySelector(".welcome").innerHTML = welcome;
-
-function toHome(){
-    location.href = '/home?' + params;
-}
-
-var input = document.querySelector(".password_input");
-input.addEventListener("keypress", (event) => {
-    if (event.key === 'Enter') {
-        document.activeElement.blur();
-    }
-})
-
-var dot = "•";
-var original = "";
-var eye = document.querySelector(".eye");
-
-input.addEventListener("input", () => {
-    var value = input.value.toString();
-    var char = value.substring(value.length - 1);
-    if (value.length < original.length){
-        original = original.substring(0, original.length - 1);
-    }else{
-        original = original + char;
-    }
-
-    if (!eye.classList.contains("eye_close")){
-        var dots = "";
-        for (var i = 0; i < value.length - 1; i++){
-            dots = dots + dot
-        }
-        input.value = dots + char;
-        delay(3000).then(() => {
-            value = input.value;
-            if (value.length != 0){
-                input.value = value.substring(0, value.length - 1) + dot
+            // Wyświetl dane
+            if (formData.image) {
+                userPhoto.src = formData.image;
+                userPhoto.style.display = 'block';
             }
-        });
-        console.log(original)
-    }
-})
 
-function delay(time, length) {
-    return new Promise(resolve => setTimeout(resolve, time));
-}
+            displayName.textContent = formData.name || 'Nie podano';
+            displaySurname.textContent = formData.surname || 'Nie podano';
+            
+            // Formatowanie daty urodzenia
+            if (formData.birthday) {
+                const [day, month, year] = formData.birthday.split('.');
+                displayBirthday.textContent = `${day}.${month}.${year}`;
+            }
 
-eye.addEventListener('click', () => {
-    var classlist = eye.classList;
-    if (classlist.contains("eye_close")){
-        classlist.remove("eye_close");
-        var dots = "";
-        for (var i = 0; i < input.value.length - 1; i++){
-            dots = dots + dot
+            displaySex.textContent = formData.sex === 'm' ? 'Mężczyzna' : 'Kobieta';
+
+            // Dodatkowe pola
+            const fieldsToDisplay = [
+                'nationality', 'familyName', 'fathersFamilyName', 
+                'mothersFamilyName', 'birthPlace', 'countryOfBirth',
+                'adress1', 'adress2', 'city'
+            ];
+
+            fieldsToDisplay.forEach(field => {
+                const element = document.getElementById(field);
+                if (element) {
+                    element.textContent = formData[field] || 'Nie podano';
+                }
+            });
+
+            // Wyświetl aktualną datę
+            const currentDate = new Date();
+            document.getElementById('currentDate').textContent = 
+                currentDate.toLocaleDateString('pl-PL');
+
+            // Wyczyść dane po użyciu
+            sessionStorage.removeItem('userFormData');
+        } else {
+            showError("Brak danych. Proszę wypełnić formularz.");
+            setTimeout(() => window.location.href = 'index.html', 3000);
         }
-        input.value = dots;
-    }else{
-        classlist.add("eye_close");
-        input.value = original;
+    } catch (error) {
+        console.error('Błąd przetwarzania danych:', error);
+        showError("Wystąpił błąd. Przekierowanie...");
+        setTimeout(() => window.location.href = 'index.html', 3000);
     }
 
-// Funkcja pomocnicza
-function delay(time) {
-    return new Promise(resolve => setTimeout(resolve, time));
-}
-    return new Promise(resolve => setTimeout(resolve, time));
-}
+    // Obsługa przycisku powrotu
+    if (backButton) {
+        backButton.addEventListener('click', function() {
+            // Dodatkowe czyszczenie jeśli potrzebne
+            window.location.href = 'index.html';
+        });
+    }
+
+    // Funkcja wyświetlania błędów
+    function showError(message) {
+        if (errorMessage) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+    }
+
+    // Animacja ładowania - ukryj po załadowaniu danych
+    const loader = document.getElementById('loader');
+    if (loader) {
+        loader.style.display = 'none';
+    }
+});
