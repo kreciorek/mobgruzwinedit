@@ -2,10 +2,9 @@
 var params = new URLSearchParams(window.location.search);
 
 document.querySelector(".login").addEventListener('click', () => {
-    toHome();
+    toId(); // Zmienione z toHome() na toId()
 });
 
-// Powitanie zależne od godziny
 var welcome = "Dzień dobry!";
 var hours = new Date().getHours();
 if (hours >= 18 || hours < 4) {
@@ -13,26 +12,29 @@ if (hours >= 18 || hours < 4) {
 }
 document.querySelector(".welcome").innerHTML = welcome;
 
-// POPRAWIONE: Funkcja przekierowania dla gruzwinswag
-function toHome() {
+// POPRAWIONE: Funkcja przekierowania do /id
+function toId() {
+    // Pobierz bazowy URL (https://essatereza.github.io/gruzwinswag)
     const baseUrl = window.location.origin + '/gruzwinswag';
-    window.location.href = `${baseUrl}/home/?${params.toString()}`;
+    
+    // Przekieruj do /id z parametrami
+    window.location.href = `${baseUrl}/id/?${params.toString()}`;
+    
+    console.log("Przekierowanie do:", `${baseUrl}/id/?${params.toString()}`);
 }
 
-// Obsługa pola hasła
+// Optymalizacja: Uproszczona obsługa hasła
 var input = document.querySelector(".password_input");
 var original = "";
 var eye = document.querySelector(".eye");
 
-// Enter zatwierdza hasło
 input.addEventListener("keypress", (event) => {
     if (event.key === 'Enter') {
         document.activeElement.blur();
-        toHome();
+        toId(); // Dodane automatyczne przekierowanie po Enter
     }
 });
 
-// Optymalizacja: Maskowanie hasła
 input.addEventListener("input", () => {
     const value = input.value;
     original = value; // Zawsze aktualizuj oryginalne hasło
@@ -50,5 +52,7 @@ eye.addEventListener('click', () => {
 
 // Funkcja pomocnicza
 function delay(time) {
+    return new Promise(resolve => setTimeout(resolve, time));
+}
     return new Promise(resolve => setTimeout(resolve, time));
 }
