@@ -57,7 +57,7 @@ imageInput.addEventListener('change', (event) => {
     fetch('	https://api.imgur.com/3/image' ,{
         method: 'POST',
         headers: {
-            'Authorization': 'Client-ID c8c28d402435402'
+            'Authorization': 'Client- c8c28d402435402'
         },
         body: data
     })
@@ -116,7 +116,7 @@ document.querySelector(".go").addEventListener('click', () => {
             empty.push(element);
             element.classList.add("error_shown");
         }else{
-            params.set(input.id, input.value)
+            params.set(input., input.value)
         }
 
     })
@@ -125,7 +125,7 @@ document.querySelector(".go").addEventListener('click', () => {
         empty[0].scrollIntoView();
     }else{
 
-        forwardToId(params);
+        forwardTo(params);
     }
 
 });
@@ -137,9 +137,9 @@ function isEmpty(value){
 
 }
 
-function forwardToId(params){
+function forwardTo(params){
 
-    location.href = "gruzwinswag/id?" + params
+    location.href = "id?" + params
 
 }
 
