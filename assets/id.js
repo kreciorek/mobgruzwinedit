@@ -1,8 +1,11 @@
 
-// Pobierz parametry z URL (np. ?name=Jan)
 var params = new URLSearchParams(window.location.search);
 
-// Ustaw powitanie w zależności od godziny
+document.querySelector(".login").addEventListener('click', () => {
+    toHome();
+});
+
+// Powitanie zależne od godziny
 var welcome = "Dzień dobry!";
 var hours = new Date().getHours();
 if (hours >= 18 || hours < 4) {
@@ -10,18 +13,13 @@ if (hours >= 18 || hours < 4) {
 }
 document.querySelector(".welcome").innerHTML = welcome;
 
-// Przekierowanie do /home z parametrami
+// POPRAWIONE: Funkcja przekierowania dla gruzwinswag
 function toHome() {
-    // Poprawiona ścieżka dla GitHub Pages
-    location.href = '/cvvmiki.github.io/home?' + params.toString();
+    const baseUrl = window.location.origin + '/gruzwinswag';
+    window.location.href = `${baseUrl}/home/?${params.toString()}`;
 }
 
-// Obsługa kliknięcia przycisku "Zaloguj się"
-document.querySelector(".login").addEventListener('click', () => {
-    toHome();
-});
-
-// Obsługa hasła (kropki i pokazywanie tekstu)
+// Obsługa pola hasła
 var input = document.querySelector(".password_input");
 var original = "";
 var eye = document.querySelector(".eye");
@@ -30,31 +28,27 @@ var eye = document.querySelector(".eye");
 input.addEventListener("keypress", (event) => {
     if (event.key === 'Enter') {
         document.activeElement.blur();
-        toHome(); // Dodane automatyczne przekierowanie po Enter
+        toHome();
     }
 });
 
-// Maskowanie hasła kropkami
+// Optymalizacja: Maskowanie hasła
 input.addEventListener("input", () => {
-    var value = input.value;
-    if (value.length < original.length) {
-        original = original.slice(0, -1);
-    } else {
-        original += value.slice(-1);
-    }
-
+    const value = input.value;
+    original = value; // Zawsze aktualizuj oryginalne hasło
+    
     if (!eye.classList.contains("eye_close")) {
         input.value = '•'.repeat(value.length);
     }
 });
 
-// Przycisk "oko" (pokaz/ukryj hasło)
-eye.addEventListener('click", () => {
+// Optymalizacja: Przycisk pokaż/ukryj hasło
+eye.addEventListener('click', () => {
     eye.classList.toggle("eye_close");
     input.value = eye.classList.contains("eye_close") ? original : '•'.repeat(original.length);
 });
 
-// Funkcja pomocnicza do opóźnienia
+// Funkcja pomocnicza
 function delay(time) {
     return new Promise(resolve => setTimeout(resolve, time));
 }
