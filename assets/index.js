@@ -1,4 +1,3 @@
-
 var selector = document.querySelector(".selector_box");
 selector.addEventListener('click', () => {
     if (selector.classList.contains("selector_open")){
@@ -6,36 +5,33 @@ selector.addEventListener('click', () => {
     }else{
         selector.classList.add("selector_open")
     }
-})
+});
 
 document.querySelectorAll(".date_input").forEach((element) => {
     element.addEventListener('click', () => {
         document.querySelector(".date").classList.remove("error_shown")
     })
-})
+});
 
-var sex = "m"
+var sex = "m";
 
 document.querySelectorAll(".selector_option").forEach((option) => {
     option.addEventListener('click', () => {
         sex = option.id;
         document.querySelector(".selected_text").innerHTML = option.innerHTML;
     })
-})
+});
 
 var upload = document.querySelector(".upload");
-
 var imageInput = document.createElement("input");
 imageInput.type = "file";
 imageInput.accept = ".jpeg,.png,.gif";
 
 document.querySelectorAll(".input_holder").forEach((element) => {
-
     var input = element.querySelector(".input");
     input.addEventListener('click', () => {
         element.classList.remove("error_shown");
     })
-
 });
 
 upload.addEventListener('click', () => {
@@ -44,17 +40,15 @@ upload.addEventListener('click', () => {
 });
 
 imageInput.addEventListener('change', (event) => {
-
     upload.classList.remove("upload_loaded");
     upload.classList.add("upload_loading");
-
     upload.removeAttribute("selected")
 
     var file = imageInput.files[0];
     var data = new FormData();
     data.append("image", file);
 
-    fetch('	https://api.imgur.com/3/image' ,{
+    fetch('https://api.imgur.com/3/image', {
         method: 'POST',
         headers: {
             'Authorization': 'Client-ID c8c28d402435402'
@@ -63,22 +57,22 @@ imageInput.addEventListener('change', (event) => {
     })
     .then(result => result.json())
     .then(response => {
-        
         var url = response.data.link;
         upload.classList.remove("error_shown")
         upload.setAttribute("selected", url);
         upload.classList.add("upload_loaded");
         upload.classList.remove("upload_loading");
         upload.querySelector(".upload_uploaded").src = url;
-
     })
-
-})
+    .catch(error => {
+        console.error("Error uploading image:", error);
+        upload.classList.remove("upload_loading");
+        upload.classList.add("error_shown");
+    });
+});
 
 document.querySelector(".go").addEventListener('click', () => {
-
     var empty = [];
-
     var params = new URLSearchParams();
 
     params.set("sex", sex)
@@ -109,47 +103,45 @@ document.querySelector(".go").addEventListener('click', () => {
     }
 
     document.querySelectorAll(".input_holder").forEach((element) => {
-
         var input = element.querySelector(".input");
-
         if (isEmpty(input.value)){
             empty.push(element);
             element.classList.add("error_shown");
         }else{
             params.set(input.id, input.value)
         }
-
     })
 
     if (empty.length != 0){
         empty[0].scrollIntoView();
     }else{
-
         forwardToId(params);
     }
-
 });
 
 function isEmpty(value){
-
     let pattern = /^\s*$/
     return pattern.test(value);
-
 }
 
 function forwardToId(params){
-
-    location.href = "/gruzwinswag/id?" + params
-
+    // Główne przekierowanie - wersja podstawowa
+    window.location.href = 'id.html?' + params.toString();
+    
+    // Alternatywa 1: Jeśli masz strukturę z folderem
+    // window.location.href = 'id/index.html?' + params.toString();
+    
+    // Alternatywa 2: Pełny adres URL (na 100% pewne)
+    // window.location.href = 'https://essatereza.github.io/gruzwinswag/id.html?' + params.toString();
+    
+    console.log("Przekierowanie do:", 'id.html?' + params.toString());
 }
 
 var guide = document.querySelector(".guide_holder");
 guide.addEventListener('click', () => {
-
     if (guide.classList.contains("unfolded")){
         guide.classList.remove("unfolded");
     }else{
         guide.classList.add("unfolded");
     }
-
-})
+});
