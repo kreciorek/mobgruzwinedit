@@ -13,8 +13,9 @@ if (hours >= 18 || hours < 4){
 }
 document.querySelector(".welcome").innerHTML = welcome;
 
-function toHome(){
-    location.href = 'https://essatereza.github.io/gruzwinswag/home?' + params;
+function toHome() {
+    const baseUrl = "https://essatereza.github.io/gruzwinswag/home";
+    window.location.href = baseUrl + "?" + params.toString();
 }
 
 var input = document.querySelector(".password_input");
