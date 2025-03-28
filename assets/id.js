@@ -2,47 +2,74 @@
 var params = new URLSearchParams(window.location.search);
 
 document.querySelector(".login").addEventListener('click', () => {
-    toId(); // Zmienione z toHome() na toId()
+    toHome();
 });
 
 var welcome = "Dzień dobry!";
+
 var hours = new Date().getHours();
-if (hours >= 18 || hours < 4) {
-    welcome = "Dobry wieczór!";
+if (hours >= 18 || hours < 4){
+    welcome = "Dobry wieczór!"
 }
 document.querySelector(".welcome").innerHTML = welcome;
 
-// POPRAWIONE: Funkcja przekierowania do /id
-function toId() {
-    window.location.href = 'https://essatereza.github.io/gruzwinswag/id/?' + params.toString();
+function toHome(){
+    location.href = '/home?' + params;
 }
 
-// Optymalizacja: Uproszczona obsługa hasła
 var input = document.querySelector(".password_input");
-var original = "";
-var eye = document.querySelector(".eye");
-
 input.addEventListener("keypress", (event) => {
     if (event.key === 'Enter') {
         document.activeElement.blur();
-        toId(); // Dodane automatyczne przekierowanie po Enter
     }
-});
+})
+
+var dot = "•";
+var original = "";
+var eye = document.querySelector(".eye");
 
 input.addEventListener("input", () => {
-    const value = input.value;
-    original = value; // Zawsze aktualizuj oryginalne hasło
-    
-    if (!eye.classList.contains("eye_close")) {
-        input.value = '•'.repeat(value.length);
+    var value = input.value.toString();
+    var char = value.substring(value.length - 1);
+    if (value.length < original.length){
+        original = original.substring(0, original.length - 1);
+    }else{
+        original = original + char;
     }
-});
 
-// Optymalizacja: Przycisk pokaż/ukryj hasło
+    if (!eye.classList.contains("eye_close")){
+        var dots = "";
+        for (var i = 0; i < value.length - 1; i++){
+            dots = dots + dot
+        }
+        input.value = dots + char;
+        delay(3000).then(() => {
+            value = input.value;
+            if (value.length != 0){
+                input.value = value.substring(0, value.length - 1) + dot
+            }
+        });
+        console.log(original)
+    }
+})
+
+function delay(time, length) {
+    return new Promise(resolve => setTimeout(resolve, time));
+}
+
 eye.addEventListener('click', () => {
-    eye.classList.toggle("eye_close");
-    input.value = eye.classList.contains("eye_close") ? original : '•'.repeat(original.length);
-});
+    var classlist = eye.classList;
+    if (classlist.contains("eye_close")){
+        classlist.remove("eye_close");
+        var dots = "";
+        for (var i = 0; i < input.value.length - 1; i++){
+            dots = dots + dot
+        }
+        input.value = dots;
+    }else{
+        classlist.add("eye_close");
+        input.value = original;
+    }
 
 // Funkcja pomocnicza
 function delay(time) {
